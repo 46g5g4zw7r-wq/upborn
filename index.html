@@ -1820,7 +1820,7 @@ document.addEventListener('click',e=>{
   if(a==='fly'){closeOv();flight(true);return}
   if(a==='story'){if(!DL||!S)return;b.disabled=true;storyPNG().then(blob=>DL.save({filename:`upborn-${S.first[1].toLowerCase()}.png`,data:blob})).then(()=>toast(U().misc.saved),e=>{if(e&&e.code==='unavailable')b.hidden=true}).finally(()=>{b.disabled=false});return}
   if(a==='mode'){MODE=k;renderStart();return}
-  if(a==='born'){S=newLife(MODE);S.born=Date.now();UI={rung:null,status:null,age:null};store.set('upborn.life',S);pushPresence();render();window.scrollTo({top:0});birthReveal();return}
+  if(a==='born'){S=newLife(MODE);if(PICK_YEAR>=2026)S.born=Date.now();UI={rung:null,status:null,age:null};store.set('upborn.life',S);pushPresence();render();window.scrollTo({top:0});birthReveal();return}
   if(a==='resume'){S=store.get('upborn.life');UI={rung:null,status:null,age:null};pushPresence();render();return}
   if(a==='home'){S=null;pushPresence();render();return}
   if(!S)return;
