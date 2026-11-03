@@ -846,6 +846,7 @@ function applyRoute(s,id){const r=ROUTES.find(x=>x.id===id);if(!r||!routeOpen(s,
 function pend(s,id,d){s.pending={id,d:d||{}}}
 const TT=()=>(I18N_ALL[LANG]||I18N_ALL.ru).choices;
 const U=()=>(I18N_ALL[LANG]||I18N_ALL.ru).ui;
+const GM=()=>(I18N_ALL[LANG]||I18N_ALL.ru).games;
 const CN=k=>{const b=C[k],t=(I18N_ALL[LANG]||{}).ctry;if(!t||LANG==='ru')return b;const x=t.home[k]||t.dest[k];return x?Object.assign({},b,x):b};
 const CHO={
  date:{text:(s,d)=>TT().dateText(s,d),
@@ -1296,10 +1297,10 @@ function closeOv(){const o=document.getElementById('ov');if(o)o.remove()}
 const WORLD=[['🇮🇳','Индия'],['🇨🇳','Китай'],['🇳🇬','Нигерия'],['🇵🇰','Пакистан'],['🇮🇩','Индонезия'],['🇨🇩','ДР Конго'],['🇪🇹','Эфиопия'],['🇺🇸','США'],['🇧🇩','Бангладеш'],['🇪🇬','Египет'],['🇧🇷','Бразилия'],['🇵🇭','Филиппины'],['🇲🇽','Мексика'],['🇹🇿','Танзания'],['🇷🇺','Россия'],['🇨🇦','Канада'],['🇫🇷','Франция'],['🇯🇵','Япония']];
 function birthReveal(){
   const s=S,h=C[s.home],pc=(h.births/BIRTH_TOTAL*100).toFixed(1).replace('.',',');
-  const o=overlay(`<div class="label">Лотерея рождения</div><div class="spin-flag" id="spF">🌍</div><div class="spin-name" id="spN">…</div><p id="spSub">Каждую секунду на Земле рождаются около четырёх детей. Один из них — ты.</p><div id="spRest"></div>`);
+  const o=overlay(`<div class="label">${GM().birthLabel}</div><div class="spin-flag" id="spF">🌍</div><div class="spin-name" id="spN">…</div><p id="spSub">${GM().birthSub}</p><div id="spRest"></div>`);
   const fin=()=>{const f=document.getElementById('spF'),n=document.getElementById('spN');if(!f)return;f.textContent=h.flag;n.textContent=h.name;n.classList.remove('land');void n.offsetWidth;n.classList.add('land');
-    document.getElementById('spSub').textContent=`Шанс родиться здесь в прототипе: ${pc}%`;
-    document.getElementById('spRest').innerHTML=passportHTML(s,s.home,{cls:'in open'})+`<div class="spin-facts"><div><b>Дата рождения</b>${bdLong(s)}, ${bdTime(s)}</div><div><b>Место</b>${esc(s.place)}</div><div><b>Семья</b>${s.siblings?`родители, ${sibText(s)}`:'родители, ты единственный ребёнок'}</div><div><b>Достаток</b>ступень ${s.startRung} из 10 · ${U().rung[s.startRung-1].toLowerCase()}</div><div><b>Таланты</b>${s.talents.map(t=>U().talents[t]).join(', ')}</div><div><b>До 5 лет не доживают</b>≈ ${Math.max(1,Math.round(h.u5/10))} из 100</div><div><b>Жизнь в среднем</b>${h.le.toFixed(1).replace('.',',')} года</div></div><button class="primary" data-act="closeov" id="startLife">Начать эту жизнь</button>`;
+    document.getElementById('spSub').textContent=`${GM().birthChance(pc)}`;
+    document.getElementById('spRest').innerHTML=passportHTML(s,s.home,{cls:'in open'})+`<div class="spin-facts"><div><b>${GM().birthFacts.date}</b>${bdLong(s)}, ${bdTime(s)}</div><div><b>${GM().birthFacts.place}</b>${esc(s.place)}</div><div><b>${GM().birthFacts.family}</b>${s.siblings?`родители, ${sibText(s)}`:'родители, ты единственный ребёнок'}</div><div><b>${GM().birthFacts.means}</b>ступень ${s.startRung} из 10 · ${U().rung[s.startRung-1].toLowerCase()}</div><div><b>${GM().birthFacts.talents}</b>${s.talents.map(t=>U().talents[t]).join(', ')}</div><div><b>${GM().birthFacts.u5}</b>≈ ${Math.max(1,Math.round(h.u5/10))} из 100</div><div><b>${GM().birthFacts.life}</b>${h.le.toFixed(1).replace('.',',')} года</div></div><button class="primary" data-act="closeov" id="startLife">Начать эту жизнь</button>`;
     document.getElementById('startLife').focus()};
   if(REDUCE){fin();return}
   let i=0,delay=55;const spin=()=>{if(!document.getElementById('spN'))return;const w=WORLD[i++%WORLD.length];document.getElementById('spF').textContent=w[0];document.getElementById('spN').textContent=w[1];delay*=1.13;if(delay>320)return fin();setTimeout(spin,delay)};spin();
@@ -1307,8 +1308,8 @@ function birthReveal(){
 }
 function flight(toCanada){
   const s=S,DS=C[s.dest||'CA'],fromName=toCanada?C[s.home].name:DS.name,toName=toCanada?DS.name:C[s.home].name;
-  const ok=toCanada;const label=ok?`${statusName(s)} · въезд разрешён`:'Возвращение домой';
-  overlay(`<div class="label">${ok?'Перелёт':'Обратный рейс'}</div><h2>${esc(fromName)} → ${esc(toName)}</h2>
+  const ok=toCanada;const label=ok?`${statusName(s)} · ${GM().flightArrived}`:GM().flightReturn;
+  overlay(`<div class="label">${ok?GM().flightLabel:GM().flightBack}</div><h2>${esc(fromName)} → ${esc(toName)}</h2>
    <div class="flight"><svg viewBox="0 0 600 240" role="img" aria-label="Перелёт ${esc(fromName)} — ${esc(toName)}">
     <path id="arc" d="${ok?'M520 190 Q 320 -40 90 120':'M90 120 Q 320 -40 520 190'}" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2" stroke-dasharray="6 7"/>
     <path id="trail" d="${ok?'M520 190 Q 320 -40 90 120':'M90 120 Q 320 -40 520 190'}" fill="none" stroke="#FFC94D" stroke-width="3" stroke-linecap="round"/>
@@ -1316,7 +1317,7 @@ function flight(toCanada){
     <circle cx="90" cy="120" r="6" fill="#FFFFFF"/><text x="90" y="152" fill="#AAB4D8" font-size="15" text-anchor="middle" font-family="Onest,system-ui">${esc(DS.name)}</text>
     <g id="plane"><path d="M-14 0 L10 -3 L16 0 L10 3 Z M-2 -1 L-8 -12 L-3 -12 L6 -1 Z M-2 1 L-8 12 L-3 12 L6 1 Z M-14 0 L-18 -5 L-15 -5 L-10 -1 Z M-14 0 L-18 5 L-15 5 L-10 1 Z" fill="#FFFFFF"/></g>
    </svg></div>
-   <div id="flEnd" hidden><div class="big-stamp ${ok?'ok':''}">${label}</div><p>${ok?`Новая жизнь начинается: ${esc(s.place)}.`:'Всё придётся начинать заново.'}</p><button class="primary" data-act="closeov" id="flDone">Дальше</button></div>`);
+   <div id="flEnd" hidden><div class="big-stamp ${ok?'ok':''}">${label}</div><p>${ok?GM().flightNew(esc(s.place)):GM().flightOld}</p><button class="primary" data-act="closeov" id="flDone">${U().buttons.next}</button></div>`);
   const arc=document.getElementById('arc'),tr=document.getElementById('trail'),pl=document.getElementById('plane'),len=arc.getTotalLength();
   tr.style.strokeDasharray=len;tr.style.strokeDashoffset=len;
   const end=()=>{const e=document.getElementById('flEnd');if(e){e.hidden=false;document.getElementById('flDone').focus()}};
@@ -1350,7 +1351,7 @@ function citizenship(){
   overlay(`<div class="label">Присяга гражданина</div><h2>Теперь у тебя паспорт: ${esc(C[s.dest].name)}</h2>
    <div class="pp-swap"><div id="ppOld">${passportHTML(s,old,{cls:'opened'})}</div><div id="ppNew" hidden>${passportHTML(s,s.dest,{cls:'in open'})}</div></div>
    <div class="vf">Без визы: <b>≈ ${PP[s.dest].vf}</b> стран <span>(было ≈ ${PP[old].vf})</span></div>
-   <p>Ты родил${G(s,'ся','ась')} ${C[old].loc}. Путь занял ${yrs(s.yrsAbroad)}.</p><button class="primary" data-act="closeov" id="ctBtn">Дальше</button>`);
+   <p>Ты родил${G(s,'ся','ась')} ${C[old].loc}. Путь занял ${yrs(s.yrsAbroad)}.</p><button class="primary" data-act="closeov" id="ctBtn">${U().buttons.next}</button>`);
   const o=document.querySelector('#ppOld .pp'),n=document.getElementById('ppNew');
   if(REDUCE){document.getElementById('ppOld').hidden=true;n.hidden=false;return}
   setTimeout(()=>{if(o)o.classList.add('out');setTimeout(()=>{if(n){n.hidden=false}},450)},700);
@@ -1438,7 +1439,7 @@ function luckPick(){
    <p>Весь год — только на удачу: ни учёбы, ни работы. Чем больше приз, тем меньше шанс.${s.talents.includes('luck')?' Ты везунчик — шансы ×1,5.':''}${s.luckStreak?` Ставишь ${s.luckStreak+1}-й год подряд — шансы ниже.`:''}</p>
    <div class="lk-list">${LUCK.map(L=>{const ok=luckAvail(s,L),p=luckOdds(s,L.id);const why=typeof L.why==='function'?L.why(s):L.why;
      return`<button class="lk" data-act="luckgoal" data-k="${L.id}" id="lk-${L.id}" ${ok?'':'disabled'}><span class="lk-p mono">${ok?(p*100<10?(p*100).toFixed(1).replace('.',','):Math.round(p*100))+'%':'—'}</span><span class="lk-t"><b>${L.name}</b><span>${ok?L.sub:why}</span></span><span class="lk-bar"><i style="width:${Math.max(2,p*100)}%"></i></span></button>`}).join('')}</div>
-   <button class="ghost" data-act="luckcancel" id="lkCancel">Передумать — жить как обычно</button>`);
+   <button class="ghost" data-act="luckcancel" id="lkCancel">${U().buttons.cancelLuck}</button>`);
 }
 function wheel(res,then){
   const L=LUCK.find(x=>x.id===res.goal),p=Math.max(res.p,0),deg=p*360;
@@ -1447,7 +1448,7 @@ function wheel(res,then){
   const target=res.win?deg*(.2+Math.random()*.6):deg+(360-deg)*(.1+Math.random()*.8);
   const spin=360*6-target;
   overlay(`<div class="label">Испытать судьбу</div><h2>${esc(L?L.name:'')}</h2><p>Шанс: ${(p*100).toFixed(p<.1?1:0).replace('.',',')}%</p>
-   <div class="wh"><svg viewBox="0 0 280 300" role="img" aria-label="Колесо удачи">
+   <div class="wh"><svg viewBox="0 0 280 300" role="img" aria-label="${GM().wheelLabel}">
     <g id="whG" style="transform-origin:140px 140px">
      <circle cx="140" cy="140" r="${R}" fill="#2A3352"/>
      ${p>0?`<path d="M${cx} ${cy} L${x1} ${y1} A${R} ${R} 0 ${large} 1 ${x2} ${y2} Z" fill="#FFC94D"/>`:''}
@@ -1457,7 +1458,7 @@ function wheel(res,then){
     <circle cx="140" cy="140" r="16" fill="#F2F4FF"/>
     <path d="M140 8 L152 30 L128 30 Z" fill="#F2F4FF"/>
    </svg></div>
-   <div id="whRes" hidden><div class="big-stamp ${res.win?'ok':''}">${res.na?'Ставка недоступна':res.win?'Повезло!':'Не повезло'}</div><p>${esc(S.log.filter(e=>e.age===S.age).map(e=>e.text).find(t=>/удач|Повезло|Джекпот|лотере|Невероятн|работодатель/.test(t))||'')}</p><button class="primary" data-act="wheeldone" id="whDone">Дальше</button></div>`);
+   <div id="whRes" hidden><div class="big-stamp ${res.win?'ok':''}">${res.na?GM().wheelNA:res.win?GM().wheelWin:GM().wheelLose}</div><p>${esc(S.log.filter(e=>e.age===S.age).map(e=>e.text).find(t=>/удач|Повезло|Джекпот|лотере|Невероятн|работодатель/.test(t))||'')}</p><button class="primary" data-act="wheeldone" id="whDone">${U().buttons.next}</button></div>`);
   const g=document.getElementById('whG'),done=()=>{const r=document.getElementById('whRes');if(r){r.hidden=false;document.getElementById('whDone').focus()}};
   UI.afterWheel=then;
   if(REDUCE){g.style.transform=`rotate(${spin}deg)`;done();return}
@@ -1474,7 +1475,7 @@ function illegalConfirm(id){
      <li><b>Если поймают:</b> ${r.dest==='US'?'задержание и депортация. Повторная попытка после депортации — 2 года тюрьмы.':r.dest==='AU'?'2 года в лагере на острове, потом возвращение домой.':'возврат в лагерь в Ливии на 1–2 года.'}</li>
      <li><b>Если доберёшься:</b> убежище дают ≈ ${pc(ASYLUM[S.home]||.05)}% из ${esc(C[S.home].gen)}. Иначе — жизнь без документов: только работа за наличные, каждый год риск депортации.</li>
    </ul>
-   <div class="fin-actions"><button class="danger" data-act="illegalgo" data-k="${id}" id="ilGo">Рискнуть</button><button class="primary" data-act="closeov" id="ilNo">Не сейчас</button></div>`);
+   <div class="fin-actions"><button class="danger" data-act="illegalgo" data-k="${id}" id="ilGo">${U().buttons.risk}</button><button class="primary" data-act="closeov" id="ilNo">${U().buttons.notNow}</button></div>`);
   document.getElementById('ilNo').focus();
 }
 
@@ -1482,9 +1483,9 @@ function illegalConfirm(id){
 function timerBar(sec,onDone){const bar=document.getElementById('tb');if(!bar)return()=>{};bar.style.transition='none';bar.style.transform='scaleX(1)';void bar.offsetWidth;bar.style.transition=`transform ${sec}s linear`;bar.style.transform='scaleX(0)';const id=setTimeout(onDone,sec*1000);return()=>clearTimeout(id)}
 // 1) side hustle: tap targets for 15 s
 function hustleGame(){
-  const s=S,ca=!home(s),title=ca?'Смена в доставке':'Торговля на рынке',hint=ca?'Хватай посылки, пока не исчезли':'Лови покупателей: тапай по ним, пока не ушли';
-  overlay(`<div class="label">Подработка · 15 секунд</div><h2>${title}</h2><p>${hint}</p>
-   <div class="game-hud"><span>Время <b id="gT">15</b></span><span>${ca?'Посылок':'Продаж'} <b id="gS">0</b></span></div>
+  const s=S,ca=!home(s),title=ca?GM().hustleTitleCa:GM().hustleTitleHome,hint=ca?GM().hustleHintCa:GM().hustleHintHome;
+  overlay(`<div class="label">${GM().hustleLabel}</div><h2>${title}</h2><p>${hint}</p>
+   <div class="game-hud"><span>${GM().hustleTime} <b id="gT">15</b></span><span>${ca?GM().hustleSalesCa:GM().hustleSalesHome} <b id="gS">0</b></span></div>
    <div class="game-field" id="gF"><canvas id="gC"></canvas></div>
    <div id="gEnd"></div>`);
   const cv=document.getElementById('gC'),ctx=cv.getContext('2d'),fld=document.getElementById('gF');
@@ -1502,7 +1503,7 @@ function hustleGame(){
       else{ctx.fillStyle=it.gold?'#FFC94D':it.c;ctx.beginPath();ctx.arc(0,0,it.r,0,7);ctx.fill();ctx.fillStyle='#3E7B27';ctx.beginPath();ctx.ellipse(4,-it.r,6,3,-.5,0,7);ctx.fill()}
       ctx.strokeStyle='rgba(255,255,255,'+(1-a)+')';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,it.r+6,-Math.PI/2,-Math.PI/2+Math.PI*2*(1-a));ctx.stroke();ctx.restore()}
     pops.forEach(p=>{const k=(now-p.t)/600;if(k<1){ctx.globalAlpha=1-k;ctx.fillStyle='#FFC94D';ctx.font='700 18px Onest,system-ui';ctx.textAlign='center';ctx.fillText(p.txt,p.x,p.y-20*k)}});ctx.globalAlpha=1;
-    if(!over&&left<=0){over=true;const got=hustle(S,score);document.getElementById('gEnd').innerHTML=`<p style="margin-top:14px">${score} за 15 секунд — <b style="color:var(--ov-gold)">+$${fmt(got)}</b> в копилку</p><button class="primary" data-act="closeov" id="gDone">Готово</button>`;finish();document.getElementById('gDone').focus()}
+    if(!over&&left<=0){over=true;const got=hustle(S,score);document.getElementById('gEnd').innerHTML=`<p style="margin-top:14px">${GM().hustleEnd(score,fmt(got))}</p><button class="primary" data-act="closeov" id="gDone">${U().buttons.done}</button>`;finish();document.getElementById('gDone').focus()}
     requestAnimationFrame(loop)};requestAnimationFrame(loop);
 }
 // 2) exam: 5 quick problems
@@ -1515,13 +1516,13 @@ function examGame(optIndex){
     qs.push({q,a,opts:[...set].sort(()=>Math.random()-.5)})}
   let k=0,bonus=0,right=0,stop=()=>{};
   const show=()=>{if(k>=qs.length)return done();const Q=qs[k];
-    document.getElementById('exQ').innerHTML=`<div class="label">Задача ${k+1} из 5 · 7 секунд</div><div class="q">${Q.q} = ?</div><div class="qopts two">${Q.opts.map(o=>`<button class="qbtn" data-v="${o}">${o}</button>`).join('')}</div>`;
+    document.getElementById('exQ').innerHTML=`<div class="label">${GM().examQ(k+1)}</div><div class="q">${Q.q} = ?</div><div class="qopts two">${Q.opts.map(o=>`<button class="qbtn" data-v="${o}">${o}</button>`).join('')}</div>`;
     stop=timerBar(7,()=>answer(null))};
   const answer=v=>{stop();const Q=qs[k];const btns=[...document.querySelectorAll('#exQ .qbtn')];btns.forEach(b=>{b.disabled=true;if(+b.dataset.v===Q.a)b.classList.add('right');else if(v!==null&&+b.dataset.v===v)b.classList.add('wrong')});
     if(v===Q.a){bonus+=3;right++}else bonus-=2;k++;setTimeout(show,REDUCE?150:550)};
-  const done=()=>{S.examBonus=bonus;document.getElementById('exQ').innerHTML=`<div class="q">Решено ${right} из 5</div><p>${bonus>=0?'+':''}${bonus} к баллу на экзамене</p>`;
+  const done=()=>{S.examBonus=bonus;document.getElementById('exQ').innerHTML=`<div class="q">${GM().examSolved(right)}</div><p>${bonus>=0?'+':''}${bonus} ${GM().examBonus}</p>`;
     setTimeout(()=>{closeOv();resolve(S,optIndex);finish();render()},REDUCE?300:1200)};
-  overlay(`<div class="label">Вступительный экзамен</div><h2>Пять задач на время</h2><p>Каждый верный ответ +3 балла, ошибка −2. Знания дают базу, экзамен решает остальное.</p><div class="tbar"><i id="tb"></i></div><div id="exQ"></div>`);
+  overlay(`<div class="label">${GM().examLabel}</div><h2>${GM().examTitle}</h2><p>${GM().examRules}</p><div class="tbar"><i id="tb"></i></div><div id="exQ"></div>`);
   document.getElementById('exQ').addEventListener('click',e=>{const b=e.target.closest('.qbtn');if(b&&!b.disabled)answer(+b.dataset.v)});show();
 }
 // 3) visa interview
@@ -1539,19 +1540,19 @@ function interviewGame(routeId){
   const pick3=a=>a.slice().sort(()=>Math.random()-.5).slice(0,3);
   if(routeId==='agency'){const qs=pick3(AGENCY);let k=0,bonus=0,stop=()=>{};
     const show=()=>{if(k>=qs.length)return done();const Q=qs[k];
-      document.getElementById('ivQ').innerHTML=`<div class="label">Пункт ${k+1} из 3 · 6 секунд</div><div class="q">${Q[0]}</div><div class="qopts two"><button class="qbtn" data-v="1">Подозрительно</button><button class="qbtn" data-v="0">Похоже на правду</button></div>`;
+      document.getElementById('ivQ').innerHTML=`<div class="label">${GM().agencyItem(k+1)}</div><div class="q">${Q[0]}</div><div class="qopts two"><button class="qbtn" data-v="1">${GM().agencySuspicious}</button><button class="qbtn" data-v="0">${GM().agencyTrue}</button></div>`;
       stop=timerBar(6,()=>ans(null))};
     const ans=v=>{stop();const Q=qs[k];document.querySelectorAll('#ivQ .qbtn').forEach(b=>{b.disabled=true;if(+b.dataset.v===Q[1])b.classList.add('right');else if(v!==null&&+b.dataset.v===v)b.classList.add('wrong')});bonus+=v===Q[1]?.06:-.05;k++;setTimeout(show,REDUCE?150:650)};
-    const done=()=>{S.agencyBonus=bonus;const pct=Math.round(bonus*100);document.getElementById('ivQ').innerHTML=`<div class="q">${pct>=0?'Ты проверил агентство':'Ты пропустил тревожные признаки'}</div><p>Риск обмана ${pct>=0?'−':'+'}${Math.abs(pct)}%</p>`;go(routeId)};
-    overlay(`<div class="label">Проверка агентства</div><h2>Распознай мошенников</h2><p>Агентства обещают работу в Канаде. Что из этого — тревожный знак?</p><div class="tbar"><i id="tb"></i></div><div id="ivQ"></div>`);
+    const done=()=>{S.agencyBonus=bonus;const pct=Math.round(bonus*100);document.getElementById('ivQ').innerHTML=`<div class="q">${pct>=0?GM().agencyDoneOk:GM().agencyDoneBad}</div><p>Риск обмана ${pct>=0?'−':'+'}${Math.abs(pct)}%</p>`;go(routeId)};
+    overlay(`<div class="label">${GM().agencyLabel}</div><h2>${GM().agencyTitle}</h2><p>${GM().agencyText}</p><div class="tbar"><i id="tb"></i></div><div id="ivQ"></div>`);
     document.getElementById('ivQ').addEventListener('click',e=>{const b=e.target.closest('.qbtn');if(b&&!b.disabled)ans(+b.dataset.v)});show();return}
   const qs=pick3(INTERVIEW);let k=0,bonus=0,stop=()=>{};
   const show=()=>{if(k>=qs.length)return done();const Q=qs[k],opts=Q[1].slice().sort(()=>Math.random()-.5);
-    document.getElementById('ivQ').innerHTML=`<div class="officer">Визовый офицер · вопрос ${k+1} из 3 · 8 секунд</div><div class="q">«${Q[0]}»</div><div class="qopts">${opts.map(o=>`<button class="qbtn" data-v="${o[1]}">${o[0]}</button>`).join('')}</div>`;
+    document.getElementById('ivQ').innerHTML=`<div class="officer">${GM().interviewOfficer(k+1)}</div><div class="q">«${Q[0]}»</div><div class="qopts">${opts.map(o=>`<button class="qbtn" data-v="${o[1]}">${o[0]}</button>`).join('')}</div>`;
     stop=timerBar(8,()=>ans(null))};
   const ans=v=>{stop();document.querySelectorAll('#ivQ .qbtn').forEach(b=>{b.disabled=true;const bv=+b.dataset.v;if(bv>0)b.classList.add('right');else if(v!==null&&bv===v)b.classList.add('wrong')});bonus+=v===null?-8:v;k++;setTimeout(show,REDUCE?150:650)};
-  const done=()=>{S.visaBonus=bonus/100;document.getElementById('ivQ').innerHTML=`<div class="q">${bonus>10?'Офицер кивает':'Офицер что-то долго пишет'}</div><p>Шанс визы ${bonus>=0?'+':'−'}${Math.abs(bonus)}%</p>`;go(routeId)};
-  overlay(`<div class="label">Собеседование в посольстве</div><h2>У тебя 8 секунд на ответ</h2><p>Офицеру нужно поверить, что ты едешь учиться, а не теряешься.</p><div class="tbar"><i id="tb"></i></div><div id="ivQ"></div>`);
+  const done=()=>{S.visaBonus=bonus/100;document.getElementById('ivQ').innerHTML=`<div class="q">${bonus>10?GM().interviewGood:GM().interviewBad}</div><p>Шанс визы ${bonus>=0?'+':'−'}${Math.abs(bonus)}%</p>`;go(routeId)};
+  overlay(`<div class="label">${GM().interviewLabel}</div><h2>${GM().interviewTitle}</h2><p>${GM().interviewText}</p><div class="tbar"><i id="tb"></i></div><div id="ivQ"></div>`);
   document.getElementById('ivQ').addEventListener('click',e=>{const b=e.target.closest('.qbtn');if(b&&!b.disabled)ans(+b.dataset.v)});show();
   function go(id){setTimeout(()=>{closeOv();doRoute(id)},REDUCE?300:1300)}
 }
@@ -1804,7 +1805,7 @@ document.addEventListener('click',e=>{
   if(a==='illegalgo'){closeOv();const before=S.live,n=S.log.length,wasAlive=S.alive;applyRoute(S,k);finish();render();
     if(wasAlive&&!S.alive){showFinale();return}
     if(S.live!==before){flight(true);return}
-    overlay(`<div class="label">Нелегальный путь</div><h2>${S.prison?'Тюрьма':'Задержан'}</h2>${passportHTML(S,S.home,{cls:'in opened',stamp:S.prison?'Тюрьма · 2 года':'Депортирован'})}<p>${esc(S.log.slice(n).map(e=>e.text).join(' '))}</p><button class="primary" data-act="closeov" id="ilDone">Дальше</button>`);return}
+    overlay(`<div class="label">Нелегальный путь</div><h2>${S.prison?GM().illegalTitlePrison:GM().illegalTitleCaught}</h2>${passportHTML(S,S.home,{cls:'in opened',stamp:S.prison?GM().illegalStampPrison:GM().illegalStampDeported})}<p>${esc(S.log.slice(n).map(e=>e.text).join(' '))}</p><button class="primary" data-act="closeov" id="ilDone">${U().buttons.next}</button>`);return}
   if(a==='hustle'){hustleGame();return}
   if(a==='finale'){showFinale();return}
   if(a==='dest'){UI.dest=k;render();return}
@@ -1812,7 +1813,7 @@ document.addEventListener('click',e=>{
   if(a==='year')liveYear(S);
   if(a==='skip'){const was=S.age,n0=S.log.length,target=S.age<11?11:S.age+5;while(S.alive&&!S.pending&&S.age<target&&S.live===before&&S.status===stBefore){liveYear(S);if(S.luckRes)break}
     if(was<11&&S.alive&&!S.pending){const rows=S.log.slice(n0).filter(e=>e.age>=1&&e.age<=11).map(e=>`<li><b class="mono">${e.age}</b> ${esc(e.text)}</li>`).join('');
-      overlay(`<div class="label">Детство</div><h2>С ${was} до ${S.age} лет</h2><ul style="padding-left:0;list-style:none;display:grid;gap:8px;margin:12px 0">${rows||'<li>Тихие годы.</li>'}</ul><button class="primary" data-act="closeov" id="childDone">Дальше</button>`)}}
+      overlay(`<div class="label">${GM().childrenLabel}</div><h2>${GM().childrenTitle(was,S.age)}</h2><ul style="padding-left:0;list-style:none;display:grid;gap:8px;margin:12px 0">${rows||'<li>Тихие годы.</li>'}</ul><button class="primary" data-act="closeov" id="childDone">${U().buttons.next}</button>`)}}
   if(a==='choose'){const cv=choiceView(S),o=cv&&cv.opts[+k];if(o&&o.game==='exam'){examGame(+k);return}resolve(S,+k)}
   if(a==='route'){const r=ROUTES.find(x=>x.id===k);if(r&&r.illegal){illegalConfirm(k);return}if(r&&r.game&&!REDUCE){interviewGame(k);return}doRoute(k);return}
   if(a==='copy'){const v=verdict(S);const txt=`Upborn: ${S.first[0]}, ${C[S.home].name}${S.dest?' → '+C[S.dest].name:''}, ${yrs(S.deathAge)}. Ступени: ${S.startRung} → ${S.maxRung}. ${v.t}. А где родишься ты? upborn.app`;
