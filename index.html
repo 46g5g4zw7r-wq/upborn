@@ -607,37 +607,18 @@ let PICK_YEAR=2026;
 const MUSIC={on:true,ctx:null,gain:null,oscs:[],timer:null,i:0,step:0};
 try{MUSIC.on=localStorage.getItem('upborn.music')!=='off'}catch(e){}
 const CHORDS=[[220,330,440],[196,294,392],[262,330,523],[220,294,440]];
-const PENT=[261.63,293.66,329.63,392,440,523.25,587.33,659.25];
-const MOTIF=[0,2,4,2,5,4,2,1,0,2,4,6,5,4,2,0];
-function musicPluck(){
-  const c=MUSIC.ctx;if(!c||!MUSIC.playing)return;
-  const t=c.currentTime+.05;
-  const o=c.createOscillator(),e=c.createGain();
-  const oct=MUSIC.step>=MOTIF.length*2?1:0;
-  o.type='sine';o.frequency.value=PENT[MOTIF[MUSIC.step%MOTIF.length]]*(oct?1:1);
-  e.gain.setValueAtTime(0,t);e.gain.linearRampToValueAtTime(.45,t+.18);e.gain.exponentialRampToValueAtTime(.001,t+3.8);
-  o.connect(e);e.connect(MUSIC.filter);o.start(t);o.stop(t+4);
-  MUSIC.step=(MUSIC.step+1)%(MOTIF.length*2);
-  MUSIC.timer=setTimeout(musicPluck,1100);
-}
+let AUD=null;
 function musicStart(){
   if(!MUSIC.on)return;
   try{
-    if(!MUSIC.ctx){
-      const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
-      const c=new AC();const g=c.createGain();g.gain.value=0;
-      const f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=2500;
-      f.connect(g);g.connect(c.destination);
-      MUSIC.ctx=c;MUSIC.gain=g;MUSIC.filter=f;
-    }
-    MUSIC.ctx.resume();MUSIC.playing=true;
-    const t=MUSIC.ctx.currentTime;MUSIC.gain.gain.cancelScheduledValues(t);MUSIC.gain.gain.setTargetAtTime(.35,t,.8);
-    if(!MUSIC.timer)musicPluck();
+    if(!AUD){AUD=new Audio('music/loop.wav');AUD.loop=true;AUD.volume=.45;}
+    MUSIC.playing=true;
+    const p=AUD.play();if(p&&p.catch)p.catch(()=>{});
   }catch(e){}
 }
 function musicStop(){
-  MUSIC.playing=false;clearTimeout(MUSIC.timer);MUSIC.timer=null;
-  try{if(MUSIC.gain)MUSIC.gain.gain.setTargetAtTime(0,MUSIC.ctx.currentTime,.6)}catch(e){}
+  MUSIC.playing=false;
+  try{if(AUD)AUD.pause()}catch(e){}
 }
 function musicToggle(){
   MUSIC.on=!MUSIC.on;try{localStorage.setItem('upborn.music',MUSIC.on?'on':'off')}catch(e){}
