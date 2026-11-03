@@ -604,18 +604,21 @@ function addIll(s,k){s.ill=s.ill||[];if(!s.ill.includes(k))s.ill.push(k)}
 function pickHome(){return C[HOMES[Math.floor(rng()*HOMES.length)]]}
 
 let PICK_YEAR=2026;
-const MUSIC={on:true,ctx:null,gain:null,oscs:[],timer:null,i:0};
+const MUSIC={on:true,ctx:null,gain:null,oscs:[],timer:null,i:0,step:0};
 try{MUSIC.on=localStorage.getItem('upborn.music')!=='off'}catch(e){}
 const CHORDS=[[220,330,440],[196,294,392],[262,330,523],[220,294,440]];
 const PENT=[261.63,293.66,329.63,392,440,523.25,587.33,659.25];
+const MOTIF=[0,2,4,2,5,4,2,1,0,2,4,6,5,4,2,0];
 function musicPluck(){
   const c=MUSIC.ctx;if(!c||!MUSIC.playing)return;
   const t=c.currentTime+.05;
   const o=c.createOscillator(),e=c.createGain();
-  o.type='sine';o.frequency.value=PENT[Math.floor(Math.random()*PENT.length)];
-  e.gain.setValueAtTime(0,t);e.gain.linearRampToValueAtTime(.5,t+.03);e.gain.exponentialRampToValueAtTime(.001,t+3.2);
-  o.connect(e);e.connect(MUSIC.filter);o.start(t);o.stop(t+3.3);
-  MUSIC.timer=setTimeout(musicPluck,1800+Math.random()*2800);
+  const oct=MUSIC.step>=MOTIF.length*2?1:0;
+  o.type='sine';o.frequency.value=PENT[MOTIF[MUSIC.step%MOTIF.length]]*(oct?1:1);
+  e.gain.setValueAtTime(0,t);e.gain.linearRampToValueAtTime(.45,t+.18);e.gain.exponentialRampToValueAtTime(.001,t+3.8);
+  o.connect(e);e.connect(MUSIC.filter);o.start(t);o.stop(t+4);
+  MUSIC.step=(MUSIC.step+1)%(MOTIF.length*2);
+  MUSIC.timer=setTimeout(musicPluck,1100);
 }
 function musicStart(){
   if(!MUSIC.on)return;
