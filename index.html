@@ -1533,6 +1533,7 @@ const INTERVIEW=[
  ['Почему выбрали этот колледж?',[['У него сильная программа и практика с местными компаниями',7],['Он был самым дешёвым',0],['Агент выбрал за меня',-8]]],
  ['Чем вы занимались последние два года?',[['Работал и учил английский, вот сертификат',7],['Ничем особенным',-3],['Ждал визу',-8]]],
  ['Есть ли у вас семья дома?',[['Да, родители и сестра, мы на связи каждый день',6],['Есть, но мы не общаемся',-4],['Меня дома ничего не держит',-10]]]];
+const ivLoc=Q=>{const t=GM().interviewQuestions,i=INTERVIEW.indexOf(Q);if(!t||i<0||!t[i])return Q;return [t[i][0],Q[1].map((o,j)=>[t[i][1][j]||o[0],o[1]])]};
 const AGENCY=[
  ['«Гарантируем визу за две недели, 100%»',1],['«Лицензированный консультант, номер в реестре CICC можно проверить»',0],['«Оплата только наличными, договор не нужен»',1],
  ['«Работодатель оформит LMIA, мы покажем документы»',0],['«Отдайте паспорт нам на хранение»',1],['«Заплатите за место на работе — потом вернём»',1],['«Сначала собеседование с работодателем по видео»',0]];
@@ -1547,7 +1548,7 @@ function interviewGame(routeId){
     overlay(`<div class="label">${GM().agencyLabel}</div><h2>${GM().agencyTitle}</h2><p>${GM().agencyText}</p><div class="tbar"><i id="tb"></i></div><div id="ivQ"></div>`);
     document.getElementById('ivQ').addEventListener('click',e=>{const b=e.target.closest('.qbtn');if(b&&!b.disabled)ans(+b.dataset.v)});show();return}
   const qs=pick3(INTERVIEW);let k=0,bonus=0,stop=()=>{};
-  const show=()=>{if(k>=qs.length)return done();const Q=qs[k],opts=Q[1].slice().sort(()=>Math.random()-.5);
+  const show=()=>{if(k>=qs.length)return done();const Q=ivLoc(qs[k]),opts=Q[1].slice().sort(()=>Math.random()-.5);
     document.getElementById('ivQ').innerHTML=`<div class="officer">${GM().interviewOfficer(k+1)}</div><div class="q">«${Q[0]}»</div><div class="qopts">${opts.map(o=>`<button class="qbtn" data-v="${o[1]}">${o[0]}</button>`).join('')}</div>`;
     stop=timerBar(8,()=>ans(null))};
   const ans=v=>{stop();document.querySelectorAll('#ivQ .qbtn').forEach(b=>{b.disabled=true;const bv=+b.dataset.v;if(bv>0)b.classList.add('right');else if(v!==null&&bv===v)b.classList.add('wrong')});bonus+=v===null?-8:v;k++;setTimeout(show,REDUCE?150:650)};
