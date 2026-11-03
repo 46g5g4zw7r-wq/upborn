@@ -1197,7 +1197,7 @@ function tickCounters(){
   const nb=fmt(Math.floor(sec*BIRTHS_S)),nd=fmt(Math.floor(sec*DEATHS_S));set('cBorn',nb);set('cDied',nd);set('hBorn',nb);set('hDied',nd);
   const yr=(S&&S.born)?new Date(S.born).getUTCFullYear():PICK_YEAR;
   const past=yr<2026;
-  const kYr=past?popBn(yr)/8.32:1;set('cPop',past?fmt(Math.floor(popBn(yr)*1e9+sec*(BIRTHS_S-DEATHS_S)*kYr)):fmt(Math.floor(POP0+(now-POP_T0)/1000*GROWTH_S)));
+  const kYr=past?popBn(yr)/8.32:1;const tail=(yr*2654435761)%1000000;const pbase=past?Math.round(popBn(yr)*1e3)*1e6+tail:0;set('cPop',past?fmt(Math.floor(pbase+sec*(BIRTHS_S-DEATHS_S)*kYr)):fmt(Math.floor(POP0+(now-POP_T0)/1000*GROWTH_S)));
   const lb=document.getElementById('cPopLbl');
   if(lb){const want=past?POP_THEN_LBL():null;const cur=lb.getAttribute('data-k')||'';const key=past?'then':'now';if(cur!==key){lb.setAttribute('data-k',key);lb.textContent=past?want:lb.getAttribute('data-now')}}
 }
