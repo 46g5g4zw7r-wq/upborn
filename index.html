@@ -1652,9 +1652,16 @@ function applyLang(){
   const sel=document.getElementById('langSel');if(sel)sel.value=LANG;
   const nl=document.getElementById('homeBtn');if(nl)nl.textContent=tr().newlife;
 }
+const ORIG={C:{},R:{},done:false};
+function localeData(){
+  if(!ORIG.done){for(const k in C)ORIG.C[k]=Object.assign({},C[k]);for(const r of ROUTES)ORIG.R[r.id]={name:r.name,desc:r.desc};ORIG.done=true}
+  const t=I18N_ALL[LANG]||{},ct=t.ctry||{},rt=t.routes||{};
+  for(const k in C){const x=(ct.home&&ct.home[k])||(ct.dest&&ct.dest[k]);Object.assign(C[k],ORIG.C[k],x||{})}
+  for(const r of ROUTES){const o=ORIG.R[r.id],x=rt[r.id];r.name=x&&x.name||o.name;r.desc=x&&x.desc||o.desc}
+}
 function setLang(code){
   if(!LANGS[code])return;LANG=code;try{localStorage.setItem('upborn.lang',code)}catch(e){}
-  applyLang();render();
+  localeData();applyLang();render();
 }
 
 function renderStart(){
@@ -1815,7 +1822,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('startLife'))closeOv()});
 
 if(window.claude&&window.claude.hot&&window.claude.hot.snapshot)window.claude.hot.snapshot(()=>({S,MODE}));
-function start(d){if(d&&d.S&&d.S.v>=4){S=d.S;MODE=d.MODE||'fair'}LANG=detectLang();applyLang();render();Stats.init();Stats.runModel()}
+function start(d){if(d&&d.S&&d.S.v>=4){S=d.S;MODE=d.MODE||'fair'}LANG=detectLang();localeData();applyLang();render();Stats.init();Stats.runModel()}
 document.getElementById('langSel').addEventListener('change',e=>setLang(e.target.value));
 window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
 </script>
