@@ -611,7 +611,7 @@ let AUD=null;
 function musicStart(){
   if(!MUSIC.on)return;
   try{
-    if(!AUD){AUD=new Audio('music/loop.wav');AUD.loop=true;AUD.volume=.45;}
+    if(!AUD){AUD=new Audio('music/loop.mp3');AUD.loop=true;AUD.volume=.45;}
     MUSIC.playing=true;
     const p=AUD.play();if(p&&p.catch)p.catch(()=>{});
   }catch(e){}
