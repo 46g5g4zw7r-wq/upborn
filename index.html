@@ -606,19 +606,19 @@ function pickHome(){return C[HOMES[Math.floor(rng()*HOMES.length)]]}
 let PICK_YEAR=2026;
 const MUSIC={on:true,ctx:null,gain:null,oscs:[],timer:null,i:0};
 try{MUSIC.on=localStorage.getItem('upborn.music')!=='off'}catch(e){}
-const CHORDS=[[110,165,220],[98,147,196],[131,165,262],[110,147,220]];
+const CHORDS=[[220,330,440],[196,294,392],[262,330,523],[220,294,440]];
 function musicStart(){
   if(!MUSIC.on)return;
   try{
     if(!MUSIC.ctx){
       const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
       const c=new AC();const g=c.createGain();g.gain.value=0;
-      const f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=900;
+      const f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=2200;const hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=180;hp.connect(f);
       f.connect(g);g.connect(c.destination);
       MUSIC.ctx=c;MUSIC.gain=g;
       MUSIC.oscs=CHORDS[0].map((hz,k)=>{const o=c.createOscillator();o.type='sine';o.frequency.value=hz;
-        const og=c.createGain();og.gain.value=.5/(k+1);o.connect(og);og.connect(f);o.start();
-        const lfo=c.createOscillator();lfo.frequency.value=.07+k*.03;const lg=c.createGain();lg.gain.value=.012;lfo.connect(lg);lg.connect(og.gain);lfo.start();return o});
+        const og=c.createGain();og.gain.value=.35/(k+1);o.connect(og);og.connect(hp);o.start();
+        const lfo=c.createOscillator();lfo.frequency.value=.04+k*.02;const lg=c.createGain();lg.gain.value=.008;lfo.connect(lg);lg.connect(og.gain);lfo.start();return o});
     }
     MUSIC.ctx.resume();
     const t=MUSIC.ctx.currentTime;MUSIC.gain.gain.cancelScheduledValues(t);MUSIC.gain.gain.setTargetAtTime(.06,t,1.5);
