@@ -607,26 +607,35 @@ let PICK_YEAR=2026;
 const MUSIC={on:true,ctx:null,gain:null,oscs:[],timer:null,i:0};
 try{MUSIC.on=localStorage.getItem('upborn.music')!=='off'}catch(e){}
 const CHORDS=[[220,330,440],[196,294,392],[262,330,523],[220,294,440]];
+const PENT=[261.63,293.66,329.63,392,440,523.25,587.33,659.25];
+function musicPluck(){
+  const c=MUSIC.ctx;if(!c||!MUSIC.playing)return;
+  const t=c.currentTime+.05;
+  const o=c.createOscillator(),e=c.createGain();
+  o.type='sine';o.frequency.value=PENT[Math.floor(Math.random()*PENT.length)];
+  e.gain.setValueAtTime(0,t);e.gain.linearRampToValueAtTime(.5,t+.03);e.gain.exponentialRampToValueAtTime(.001,t+3.2);
+  o.connect(e);e.connect(MUSIC.filter);o.start(t);o.stop(t+3.3);
+  MUSIC.timer=setTimeout(musicPluck,1800+Math.random()*2800);
+}
 function musicStart(){
   if(!MUSIC.on)return;
   try{
     if(!MUSIC.ctx){
       const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
       const c=new AC();const g=c.createGain();g.gain.value=0;
-      const f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=2200;const hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=180;hp.connect(f);
+      const f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=2500;
       f.connect(g);g.connect(c.destination);
-      MUSIC.ctx=c;MUSIC.gain=g;
-      MUSIC.oscs=CHORDS[0].map((hz,k)=>{const o=c.createOscillator();o.type='sine';o.frequency.value=hz;
-        const og=c.createGain();og.gain.value=.35/(k+1);o.connect(og);og.connect(hp);o.start();
-        const lfo=c.createOscillator();lfo.frequency.value=.04+k*.02;const lg=c.createGain();lg.gain.value=.008;lfo.connect(lg);lg.connect(og.gain);lfo.start();return o});
+      MUSIC.ctx=c;MUSIC.gain=g;MUSIC.filter=f;
     }
-    MUSIC.ctx.resume();
-    const t=MUSIC.ctx.currentTime;MUSIC.gain.gain.cancelScheduledValues(t);MUSIC.gain.gain.setTargetAtTime(.06,t,1.5);
-    if(!MUSIC.timer)MUSIC.timer=setInterval(()=>{if(!MUSIC.ctx||!MUSIC.on)return;MUSIC.i=(MUSIC.i+1)%CHORDS.length;const tt=MUSIC.ctx.currentTime;
-      MUSIC.oscs.forEach((o,k)=>o.frequency.setTargetAtTime(CHORDS[MUSIC.i][k],tt,2.5))},9000);
+    MUSIC.ctx.resume();MUSIC.playing=true;
+    const t=MUSIC.ctx.currentTime;MUSIC.gain.gain.cancelScheduledValues(t);MUSIC.gain.gain.setTargetAtTime(.35,t,.8);
+    if(!MUSIC.timer)musicPluck();
   }catch(e){}
 }
-function musicStop(){try{if(MUSIC.gain)MUSIC.gain.gain.setTargetAtTime(0,MUSIC.ctx.currentTime,.6)}catch(e){}}
+function musicStop(){
+  MUSIC.playing=false;clearTimeout(MUSIC.timer);MUSIC.timer=null;
+  try{if(MUSIC.gain)MUSIC.gain.gain.setTargetAtTime(0,MUSIC.ctx.currentTime,.6)}catch(e){}
+}
 function musicToggle(){
   MUSIC.on=!MUSIC.on;try{localStorage.setItem('upborn.music',MUSIC.on?'on':'off')}catch(e){}
   const b=document.getElementById('musicBtn');if(b)b.setAttribute('aria-pressed',String(MUSIC.on));
