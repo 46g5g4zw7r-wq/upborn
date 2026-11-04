@@ -434,7 +434,7 @@ html[lang=zh] body{font-family:'Noto Sans SC',system-ui,sans-serif}
 .musicbtn{background:none;border:1px solid currentColor;border-radius:6px;padding:4px 9px;cursor:pointer;color:inherit;font-size:14px;margin-right:6px;opacity:.85}.musicbtn[aria-pressed="false"]{opacity:.4;text-decoration:line-through}
 .popyr{font-size:13px;opacity:.85;margin-top:2px}
 .famtab{width:100%;border-collapse:collapse;font-size:13px;margin-top:2px}.famtab th{text-align:left;font-weight:400;color:var(--muted);padding:3px 10px 3px 0;white-space:nowrap}.famtab td{text-align:right;padding:3px 0;border-top:1px solid var(--line)}.famnote{margin-top:6px}
-</style>
+.site-foot{margin-top:24px;padding:16px 0;text-align:center;font-size:13px;color:inherit;opacity:.7}.site-foot a{color:inherit}</style>
 
 <div class="app">
   <header class="top">
@@ -1759,7 +1759,7 @@ function renderStart(){
       <div class="yearpick"><label for="yearPick">Год рождения: <b id="yearVal">${PICK_YEAR}</b></label><input type="range" id="yearPick" min="1970" max="2026" value="${PICK_YEAR}"><div class="popyr" id="popTxt">${popText(PICK_YEAR)}</div></div>
       <div class="cta"><button class="primary" data-act="born" id="bornBtn">${L.born}</button>
         ${saved&&saved.alive&&saved.v>=4?`<button class="secondary" data-act="resume" id="resumeBtn">${L.resume}: ${esc(saved.first[0])}, ${yrs(saved.age)}</button>`:''}</div>
-      <p class="playing" id="playing" hidden></p><p class="playing" id="sbOnline" hidden></p>
+      <p class="playing" id="playing" hidden></p><p class="playing" id="sbOnline" hidden></p><footer class="site-foot"><a href="mailto:support@upborn.app">support@upborn.app</a><span> · Поддержка и отзывы</span></footer>
       ${tally.n?`<p class="note" style="margin-top:10px">${L.lived}: ${tally.n} · ${L.escaped}: ${tally.w}</p>`:''}
     </div>
     <aside class="odds">
